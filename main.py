@@ -5,7 +5,7 @@ import re
 
 st.set_page_config(page_title="오늘 뭐 먹지?", page_icon="🍽️", layout="centered")
 
-st.title("오늘 뭐 먹지?")
+st.title("🍽️ 오늘 뭐 먹지?")
 st.caption("기분, 음식 종류, 상황을 선택하면 Claude AI가 딱 맞는 음식을 추천해드려요.")
 
 st.divider()
