@@ -1,7 +1,7 @@
 import streamlit as st
-import anthropic
+import httpx
 import json
-import re
+import os
 
 st.set_page_config(page_title="오늘 뭐 먹지?", page_icon="🍽️", layout="centered")
 
@@ -9,9 +9,6 @@ st.title("🍽️ 오늘 뭐 먹지?")
 st.caption("기분, 음식 종류, 상황을 선택하면 Claude AI가 딱 맞는 음식을 추천해드려요.")
 
 st.divider()
-
-def clean(text):
-    return text.encode('utf-8').decode('utf-8') if text else ""
 
 def radio_with_other(label, options, key):
     choice = st.radio(label, options + ["기타"], horizontal=True, key=key)
@@ -47,12 +44,12 @@ if st.button("음식 추천받기", use_container_width=True, type="primary"):
         prompt = f"""You are a Korean food recommendation expert.
 Recommend 3 Korean foods based on these conditions and respond ONLY in JSON, no other text.
 
-mood: {clean(mood)}
-cuisine: {clean(cuisine)}
-situation: {clean(situation)}
-dietary: {clean(diet)}
-budget: {clean(price)}
-fullness: {clean(fullness)}
+mood: {mood}
+cuisine: {cuisine}
+situation: {situation}
+dietary: {diet}
+budget: {price}
+fullness: {fullness}
 
 JSON format:
 {{
@@ -66,13 +63,25 @@ JSON format:
 
         with st.spinner("Claude가 딱 맞는 음식을 고르고 있어요..."):
             try:
-                client = anthropic.Anthropic()
-                message = client.messages.create(
-                    model="claude-sonnet-4-6",
-                    max_tokens=1000,
-                    messages=[{"role": "user", "content": prompt}],
+                api_key = st.secrets["ANTHROPIC_API_KEY"]
+                payload = {
+                    "model": "claude-sonnet-4-6",
+                    "max_tokens": 1000,
+                    "messages": [{"role": "user", "content": prompt}]
+                }
+                headers = {
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                }
+                response = httpx.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers=headers,
+                    json=payload,
+                    timeout=30,
                 )
-                raw = message.content[0].text.strip().replace("```json", "").replace("```", "").strip()
+                result = response.json()
+                raw = result["content"][0]["text"].strip().replace("```json", "").replace("```", "").strip()
                 data = json.loads(raw)
 
                 st.success(f"{data.get('summary', '')}")
@@ -86,4 +95,3 @@ JSON format:
 
             except Exception as e:
                 st.error(f"오류: {str(e)}")
-                st.error(f"디버그: mood={repr(mood)}, cuisine={repr(cuisine)}")
