@@ -46,23 +46,21 @@ if st.button("✨ 음식 추천받기", use_container_width=True, type="primary"
     if not all([mood, cuisine, situation, diet]):
         st.warning("모든 항목을 입력해주세요!")
     else:
-        prompt = f"""당신은 음식 추천 전문가입니다. 아래 조건에 맞는 음식 3가지를 추천해주세요.
-
-조건:
-- 현재 기분/컨디션: {mood}
-- 원하는 음식 종류: {cuisine}
-- 상황: {situation}
-- 식이 선호/제한: {diet}
-
-반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요:
-{{
-  "recommendations": [
-    {{"name": "음식명", "emoji": "이모지1개", "reason": "이 조건에 왜 잘 맞는지 1~2문장"}},
-    {{"name": "음식명", "emoji": "이모지1개", "reason": "이 조건에 왜 잘 맞는지 1~2문장"}},
-    {{"name": "음식명", "emoji": "이모지1개", "reason": "이 조건에 왜 잘 맞는지 1~2문장"}}
-  ],
-  "summary": "오늘의 추천 한 줄 코멘트 (친근하게)"
-}}"""
+        prompt = (
+            "You are a Korean food recommendation expert. "
+            "Recommend 3 foods based on the conditions below. "
+            "Respond ONLY in JSON format with no other text.\n\n"
+            f"Mood/Condition: {mood}\n"
+            f"Cuisine preference: {cuisine}\n"
+            f"Situation: {situation}\n"
+            f"Dietary preference: {diet}\n\n"
+            "Respond in this exact JSON format:\n"
+            '{"recommendations": ['
+            '{"name": "Korean food name", "emoji": "1 emoji", "reason": "1-2 sentences in Korean explaining why"},'
+            '{"name": "Korean food name", "emoji": "1 emoji", "reason": "1-2 sentences in Korean explaining why"},'
+            '{"name": "Korean food name", "emoji": "1 emoji", "reason": "1-2 sentences in Korean explaining why"}'
+            '], "summary": "one line comment in Korean (friendly tone)"}'
+        )
 
         with st.spinner("🤔 Claude가 딱 맞는 음식을 고르고 있어요..."):
             try:
